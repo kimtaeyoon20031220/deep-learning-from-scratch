@@ -29,7 +29,7 @@ class Trainer:
         self.train_size = x_train.shape[0]
         self.iter_per_epoch = max(self.train_size / mini_batch_size, 1)
         self.max_iter = int(epochs * self.iter_per_epoch)
-        self.current_iter = 0
+        self.current_iter = 0 #iter를 기록한다.
         self.current_epoch = 0
         
         self.train_loss_list = []
@@ -37,15 +37,21 @@ class Trainer:
         self.test_acc_list = []
 
     def train_step(self):
+        #배치 생성하기
         batch_mask = np.random.choice(self.train_size, self.batch_size)
         x_batch = self.x_train[batch_mask]
         t_batch = self.t_train[batch_mask]
         
+        #network에서 gradient 구하기
         grads = self.network.gradient(x_batch, t_batch)
+        #network에서 구한 gradient를 이용하여 optimizer를 통해 network의 매개변수(W, b 등)를 업데이트한다.
         self.optimizer.update(self.network.params, grads)
         
+        #network에서 loss 구하기
         loss = self.network.loss(x_batch, t_batch)
+        #train loss 기록하기
         self.train_loss_list.append(loss)
+        #verbose == True: train loss 출력하기
         if self.verbose: print("train loss:" + str(loss))
         
         if self.current_iter % self.iter_per_epoch == 0:
@@ -64,6 +70,8 @@ class Trainer:
             self.test_acc_list.append(test_acc)
 
             if self.verbose: print("=== epoch:" + str(self.current_epoch) + ", train acc:" + str(train_acc) + ", test acc:" + str(test_acc) + " ===")
+
+        #현재 iter를 +1 한다. (한 loop 완료)
         self.current_iter += 1
 
     def train(self):
